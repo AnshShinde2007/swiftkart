@@ -9,7 +9,15 @@ const orderRoutes = require("./routes/orderroutes");
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+// Enable CORS for localhost:5173
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials: true,
+  })
+);
 
 // Routes
 app.use("/api/products", productRoutes);
