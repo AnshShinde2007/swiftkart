@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/user"; // Adjust port if needed
+const API_URL = "http://localhost:5173/api/user"; // Adjust port if needed
 
 // Fetch all user
 export const getUser = async () => {
