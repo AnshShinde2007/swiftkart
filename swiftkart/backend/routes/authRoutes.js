@@ -1,91 +1,49 @@
 const express = require("express");
-const bcrypt = require("bcryptjs");
+const passport = require("passport");
 const jwt = require("jsonwebtoken");
-const { body, validationResult } = require("express-validator");
-const User = require("../models/User");
 const router = express.Router();
 
-const JWT_SECRET = "your_secret_key"; // Change this to a secure key
-
-// 📌 Register Route
-router.post(
-    "/register",
-    [
-        body("name", "Name is required").notEmpty(),
-        body("email", "Valid email is required").isEmail(),
-        body("password", "Password must be 6+ chars").isLength({ min: 6 })
-    ],
-    async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-
-        const { name, email, password, isAdmin } = req.body;
-
-        try {
-            let user = await User.findOne({ email });
-            if (user) {
-                return res.status(400).json({ message: "User already exists" });
-            }
-
-            const hashedPassword = await bcrypt.hash(password, 10);
-
-            user = new User({
-                name,
-                email,
-                password: hashedPassword,
-                isAdmin: isAdmin || false
-            });
-
-            await user.save();
-
-            const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, JWT_SECRET, {
-                expiresIn: "1h"
-            });
-
-            res.status(201).json({ token, user });
-        } catch (error) {
-            res.status(500).json({ message: "Server error" });
-        }
-    }
+// Google Login
+router.get(
+  "/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],  // Request Google profile and email
+  })
 );
 
-// 📌 Login Route
-router.post(
-    "/login",
-    [
-        body("email", "Enter a valid email").isEmail(),
-        body("password", "Password is required").exists()
-    ],
-    async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-
-        const { email, password } = req.body;
-
-        try {
-            const user = await User.findOne({ email });
-            if (!user) {
-                return res.status(400).json({ message: "Invalid credentials" });
-            }
-
-            const isMatch = await bcrypt.compare(password, user.password);
-            if (!isMatch) {
-                return res.status(400).json({ message: "Invalid credentials" });
-            }
-
-            const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, JWT_SECRET, {
-                expiresIn: "1h"
-            });
-
-            res.json({ token, user });
-        } catch (error) {
-            res.status(500).json({ message: "Server error" });
-        }
-    }
+// Google Callback Route
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { failureRedirect: "/" }),
+  (req, res) => {
+    // On success, send the user info and the JWT token
+    res.json({
+      message: "Google authentication successful!",
+      token: req.user.token,
+      user: req.user.user,
+    });
+  }
 );
+
+// Regular Login Route
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ error: "Invalid credentials" });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
+
+    const token = jwt.sign({ userId: user._id }, "your_secret_key", {
+      expiresIn: "1h",
+    });
+
+    res.json({ token });
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 module.exports = router;

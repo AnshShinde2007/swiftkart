@@ -1,48 +1,70 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { FiSearch, FiShoppingCart } from "react-icons/fi";
+import { Card } from "react-bootstrap"; // Import Bootstrap's Card component
 
-const API_URL = "http://localhost:5000/api/products";
-
-export default function Home() {
+const Home = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    axios.get(API_URL)
-      .then(response => {
-        console.log("Home Page API Response:", response.data); // Debugging
-        setProducts(Array.isArray(response.data) ? response.data : []);
-      })
-      .catch(error => console.error("Error fetching products:", error));
+    // Fetch products from the backend
+    const fetchData = async () => {
+      try {
+        const productResponse = await axios.get("http://localhost:5000/api/products");
+        setProducts(productResponse.data);
+      } catch (error) {
+        console.error("Error fetching data", error);
+      }
+    };
+    fetchData();
   }, []);
 
   return (
-    <div className="container py-4">
-      <h1 className="mb-4">Welcome to Our Store</h1>
+    <div className="bg-light min-vh-100">
 
-      {products.length > 0 ? (
-        <div className="row">
+      {/* Navbar */}
+      <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+        <div className="container-fluid">
+          <h1 className="navbar-brand">Swift Kart</h1>
+          <div className="d-flex align-items-center gap-3">
+            <div className="position-relative">
+              <FiSearch className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" />
+              <input
+                type="text"
+                className="form-control ps-5"
+                placeholder="Search for products..."
+              />
+            </div>
+            <FiShoppingCart className="text-muted fs-4" />
+          </div>
+        </div>
+      </nav>
+
+      {/* Product Grid */}
+      <div className="container mt-5 pt-5">
+        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
           {products.map((product) => (
-            <div key={product._id} className="col-md-4 mb-4">
-              <div className="card h-100">
-                <img src={product.imageUrl} alt={product.name} className="card-img-top" />
-                <div className="card-body">
-                  <h5 className="card-title">{product.name}</h5>
-                  <p className="card-text">{product.description}</p>
-                  <p className="card-text"><strong>Category:</strong> {product.category}</p>
-                  <p className="card-text"><strong>Price:</strong> ₹{product.price}</p>
-                  <p className="card-text"><strong>Stock:</strong> {product.stock}</p>
-                  <button className="btn btn-primary" disabled={product.stock <= 0}>
-                    {product.stock > 0 ? "Buy Now" : "Out of Stock"}
-                  </button>
-                </div>
-              </div>
+            <div className="col" key={product._id}>
+              <Card className="shadow-sm rounded-lg border-0">
+                <Card.Img variant="top" src={product.imageUrl} alt={product.name} />
+                <Card.Body className="text-center">
+                  <Card.Title className="fs-5">{product.name}</Card.Title>
+                  <Card.Text className="text-muted">₹{product.price}</Card.Text>
+                  <button className="btn btn-success w-100">Add to Cart</button>
+                </Card.Body>
+              </Card>
             </div>
           ))}
         </div>
-      ) : (
-        <p>No products available at the moment.</p>
-      )}
+      </div>
+
+      {/* Footer Section */}
+      <footer className="bg-dark text-white text-center py-3 mt-5">
+        <p>&copy; 2025 Swift Kart - All rights reserved</p>
+      </footer>
+
     </div>
   );
-}
+};
+
+export default Home;

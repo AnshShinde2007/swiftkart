@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const JWT_SECRET = "your_secret_key"; // Same as in authRoutes.js
+const JWT_SECRET = process.env.JWT_SECRET; // Same as in authRoutes.js
 
 const authMiddleware = (req, res, next) => {
     const token = req.header("Authorization");
