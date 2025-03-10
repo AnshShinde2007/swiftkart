@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { getProducts, createProduct as createProductAPI } from "../api/products";
 import axios from "axios";
 
 const API_URL = "http://localhost:5000/api/products";
@@ -15,19 +14,16 @@ export default function Admin() {
     stock: "",
     imageUrl: ""
   });
+  const [editingProduct, setEditingProduct] = useState(null);
 
   useEffect(() => {
-    getProducts()
-      .then((data) => {
-        console.log("API Response:", data);
-        setProducts(Array.isArray(data) ? data : []);
-      })
+    axios.get(API_URL)
+      .then((response) => setProducts(response.data))
       .catch((error) => console.error("Error fetching products:", error));
   }, []);
 
   const updateStock = (id, newStock) => {
-    axios
-      .put(`${API_URL}/${id}`, { stock: newStock })
+    axios.put(`${API_URL}/${id}`, { stock: newStock })
       .then(() => {
         setProducts((prevProducts) =>
           prevProducts.map((product) =>
@@ -39,8 +35,7 @@ export default function Admin() {
   };
 
   const deleteProduct = (id) => {
-    axios
-      .delete(`${API_URL}/${id}`)
+    axios.delete(`${API_URL}/${id}`)
       .then(() => {
         setProducts((prevProducts) => prevProducts.filter((product) => product._id !== id));
       })
@@ -50,16 +45,31 @@ export default function Admin() {
   const createProduct = async (e) => {
     e.preventDefault();
     try {
-      const response = await createProductAPI(newProduct);
-      console.log("Created product response:", response);
-      if (response && response._id) {
-        setProducts((prevProducts) => [...prevProducts, response]);
+      const response = await axios.post(API_URL, newProduct);
+      if (response && response.data) {
+        setProducts((prevProducts) => [...prevProducts, response.data]);
         setNewProduct({ name: "", description: "", price: "", category: "", stock: "", imageUrl: "" });
-      } else {
-        console.error("Product creation failed, response:", response);
       }
     } catch (error) {
       console.error("Error creating product:", error);
+    }
+  };
+
+  const updateProduct = async (e) => {
+    e.preventDefault();
+    if (!editingProduct) return;
+    try {
+      const response = await axios.put(`${API_URL}/${editingProduct._id}`, editingProduct);
+      if (response && response.data) {
+        setProducts((prevProducts) =>
+          prevProducts.map((product) =>
+            product._id === editingProduct._id ? response.data : product
+          )
+        );
+        setEditingProduct(null);
+      }
+    } catch (error) {
+      console.error("Error updating product:", error);
     }
   };
 
@@ -68,15 +78,15 @@ export default function Admin() {
       <h1 className="mb-4">Admin Dashboard</h1>
 
       <div className="mb-4">
-        <h2>Add New Product</h2>
-        <form onSubmit={createProduct} className="d-flex flex-column gap-2">
-          <input type="text" placeholder="Name" value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} className="form-control" required />
-          <input type="text" placeholder="Description" value={newProduct.description} onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })} className="form-control" required />
-          <input type="number" placeholder="Price (₹)" value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })} className="form-control" required />
-          <input type="text" placeholder="Category" value={newProduct.category} onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })} className="form-control" required />
-          <input type="number" placeholder="Stock" value={newProduct.stock} onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })} className="form-control" required />
-          <input type="text" placeholder="Image URL" value={newProduct.imageUrl} onChange={(e) => setNewProduct({ ...newProduct, imageUrl: e.target.value })} className="form-control" required />
-          <button type="submit" className="btn btn-success">Add Product</button>
+        <h2>{editingProduct ? "Edit Product" : "Add New Product"}</h2>
+        <form onSubmit={editingProduct ? updateProduct : createProduct} className="d-flex flex-column gap-2">
+          <input type="text" placeholder="Name" value={editingProduct ? editingProduct.name : newProduct.name} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, name: e.target.value }) : setNewProduct({ ...newProduct, name: e.target.value })} className="form-control" required />
+          <input type="text" placeholder="Description" value={editingProduct ? editingProduct.description : newProduct.description} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, description: e.target.value }) : setNewProduct({ ...newProduct, description: e.target.value })} className="form-control" required />
+          <input type="number" placeholder="Price (₹)" value={editingProduct ? editingProduct.price : newProduct.price} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, price: e.target.value }) : setNewProduct({ ...newProduct, price: e.target.value })} className="form-control" required />
+          <input type="text" placeholder="Category" value={editingProduct ? editingProduct.category : newProduct.category} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, category: e.target.value }) : setNewProduct({ ...newProduct, category: e.target.value })} className="form-control" required />
+          <input type="number" placeholder="Stock" value={editingProduct ? editingProduct.stock : newProduct.stock} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, stock: e.target.value }) : setNewProduct({ ...newProduct, stock: e.target.value })} className="form-control" required />
+          <input type="text" placeholder="Image URL" value={editingProduct ? editingProduct.imageUrl : newProduct.imageUrl} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, imageUrl: e.target.value }) : setNewProduct({ ...newProduct, imageUrl: e.target.value })} className="form-control" required />
+          <button type="submit" className="btn btn-success">{editingProduct ? "Update Product" : "Add Product"}</button>
         </form>
       </div>
 
@@ -111,6 +121,7 @@ export default function Admin() {
                     <img src={product.imageUrl} alt={product.name} style={{ width: "50px", height: "50px", objectFit: "cover" }} />
                   </td>
                   <td>
+                    <button className="btn btn-warning btn-sm me-2" onClick={() => setEditingProduct(product)}>Edit</button>
                     <button className="btn btn-danger btn-sm" onClick={() => deleteProduct(product._id)}>Delete</button>
                   </td>
                 </tr>
