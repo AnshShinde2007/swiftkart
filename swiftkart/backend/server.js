@@ -6,6 +6,7 @@ require("dotenv").config();
 const productRoutes = require("./routes/productroutes");
 const userRoutes = require("./routes/userproduct");
 const orderRoutes = require("./routes/orderroutes");
+const adminRoutes = require("./routes/adminroutes"); // ✅ add this
 
 const app = express();
 app.use(express.json());
@@ -23,6 +24,7 @@ app.use(
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/admin", adminRoutes); // ✅ add this line
 
 // Database connection
 mongoose

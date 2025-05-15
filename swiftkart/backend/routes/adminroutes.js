@@ -1,5 +1,5 @@
 const express = require("express");
-const { verifyAdmin } = require("../middleware/authMiddleware");
+const { verifyAdmin } = require("../middleware/authmiddlewar");
 const router = express.Router();
 
 // Protect admin routes

@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/usermodel"); // Your user model
+const User = require("../models/usermodel");
 const JWT_secret = process.env.JWT_SECRET;
 
 const verifyAdmin = async (req, res, next) => {
@@ -13,12 +13,12 @@ const verifyAdmin = async (req, res, next) => {
     const decoded = jwt.verify(token, JWT_secret);
     const user = await User.findById(decoded.userId);
 
-    if (!user || user.role !== "admin") {
+    if (!user || !user.isAdmin) {
       return res.status(403).json({ error: "Access denied. Not an admin." });
     }
 
     req.user = user;
-    next(); // Proceed to the next middleware or route handler
+    next();
   } catch (error) {
     res.status(400).json({ error: "Invalid token." });
   }
