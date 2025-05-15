@@ -2,9 +2,6 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-
-
-
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -12,12 +9,11 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const history = useNavigate();
+  const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    // Validate form fields
     if (!name || !email || !password || !confirmPassword) {
       setError("All fields are required.");
       return;
@@ -37,8 +33,7 @@ const Register = () => {
         password,
       });
 
-      // Redirect to login page after successful registration
-      history.push("/");
+      navigate("/"); // Redirect to login after successful registration
     } catch (error) {
       setError(error.response?.data?.error || "Something went wrong. Please try again.");
     }
@@ -47,12 +42,12 @@ const Register = () => {
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center min-vh-100 bg-dark">
-      <div className="card shadow-lg p-5 w-100" style={{ maxWidth: "450px", borderRadius: "12px" }}>
-        <h2 className="text-center text-white mb-4">Admin Panel - Create an Account</h2>
+    <div className="container-fluid min-vh-100 d-flex justify-content-center align-items-center bg-light">
+      <div className="card shadow-lg p-4" style={{ width: "400px" }}>
+        <h2 className="text-center mb-4">Register</h2>
         <form onSubmit={handleRegister}>
           <div className="mb-3">
-            <label htmlFor="name" className="form-label text-white">Full Name</label>
+            <label htmlFor="name" className="form-label">Full Name</label>
             <input
               type="text"
               id="name"
@@ -61,12 +56,11 @@ const Register = () => {
               className="form-control"
               placeholder="Enter your full name"
               required
-              style={{ borderRadius: "8px" }}
             />
           </div>
 
           <div className="mb-3">
-            <label htmlFor="email" className="form-label text-white">Email Address</label>
+            <label htmlFor="email" className="form-label">Email Address</label>
             <input
               type="email"
               id="email"
@@ -75,12 +69,11 @@ const Register = () => {
               className="form-control"
               placeholder="Enter your email"
               required
-              style={{ borderRadius: "8px" }}
             />
           </div>
 
           <div className="mb-3">
-            <label htmlFor="password" className="form-label text-white">Password</label>
+            <label htmlFor="password" className="form-label">Password</label>
             <input
               type="password"
               id="password"
@@ -89,12 +82,11 @@ const Register = () => {
               className="form-control"
               placeholder="Enter your password"
               required
-              style={{ borderRadius: "8px" }}
             />
           </div>
 
           <div className="mb-3">
-            <label htmlFor="confirmPassword" className="form-label text-white">Confirm Password</label>
+            <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
             <input
               type="password"
               id="confirmPassword"
@@ -103,17 +95,15 @@ const Register = () => {
               className="form-control"
               placeholder="Confirm your password"
               required
-              style={{ borderRadius: "8px" }}
             />
           </div>
 
-          {error && <div className="text-danger mb-3">{error}</div>}
+          {error && <div className="alert alert-danger">{error}</div>}
 
           <button 
             type="submit" 
             className="btn btn-primary w-100"
             disabled={loading}
-            style={{ borderRadius: "8px" }}
           >
             {loading ? "Registering..." : "Register"}
           </button>
@@ -122,7 +112,7 @@ const Register = () => {
         <div className="mt-4 text-center">
           <p className="text-muted">
             Already have an account? 
-            <a href="/" className="text-primary">Login here</a>
+            <a href="/" className="text-primary"> Login here</a>
           </p>
         </div>
       </div>
