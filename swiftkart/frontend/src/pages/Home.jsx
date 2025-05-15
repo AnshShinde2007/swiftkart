@@ -16,7 +16,7 @@ const Home = () => {
     // Fetch products from the backend
     const fetchData = async () => {
       try {
-        const productResponse = await axios.get("http://localhost:5000/api/products");
+        const productResponse = await axios.get("https://swiftkart-backend.onrender.com/api/products");
         setProducts(productResponse.data);
         setFilteredProducts(productResponse.data); // Initially show all products
       } catch (error) {

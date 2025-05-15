@@ -10,7 +10,7 @@ const GroceriesPage = () => {
     // Fetch products from the backend
     const fetchData = async () => {
       try {
-        const productResponse = await axios.get("http://localhost:5000/api/products");
+        const productResponse = await axios.get("https://swiftkart-backend.onrender.com/api/products");
         // Filter products based on Groceries
         const filteredProducts = productResponse.data.filter(product => product.category === "Groceries");
         setProducts(filteredProducts);

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/products";
+const API_URL = "https://swiftkart-backend.onrender.com/api/products";
 
 export default function Admin() {
   const [products, setProducts] = useState([]);
