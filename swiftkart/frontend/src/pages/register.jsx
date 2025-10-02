@@ -28,7 +28,7 @@ const Register = () => {
 
     try {
       // Use relative path so Vite dev proxy (vite.config.js) forwards to http://localhost:5000
-      await axios.post("/api/users/register", {
+      await axios.post("https://swiftkart-backend.onrender.com/api/users/register", {
         name,
         email,
         password,

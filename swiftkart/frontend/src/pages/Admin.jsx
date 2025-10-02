@@ -3,7 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import ImageKit from "imagekit-javascript";
 
-const API_URL = "/api/products";
+const API_URL = "https://swiftkart-backend.onrender.com/api/products";
 
 export default function Admin() {
   const [products, setProducts] = useState([]);
