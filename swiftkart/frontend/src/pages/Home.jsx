@@ -14,7 +14,7 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const productResponse = await axios.get("/api/products");
+        const productResponse = await axios.get("https://swiftkart-backend.onrender.com/api/products");
         // Ensure the response is always an array
         const data = Array.isArray(productResponse.data) ? productResponse.data : [];
         setProducts(data);
@@ -182,3 +182,4 @@ const Home = () => {
 };
 
 export default Home;
+
