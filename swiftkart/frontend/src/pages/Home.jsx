@@ -15,10 +15,14 @@ const Home = () => {
     const fetchData = async () => {
       try {
         const productResponse = await axios.get("/api/products");
-        setProducts(productResponse.data);
-        setFilteredProducts(productResponse.data);
+        // Ensure the response is always an array
+        const data = Array.isArray(productResponse.data) ? productResponse.data : [];
+        setProducts(data);
+        setFilteredProducts(data);
       } catch (error) {
         console.error("Error fetching data", error);
+        setProducts([]);
+        setFilteredProducts([]);
       }
     };
     fetchData();
