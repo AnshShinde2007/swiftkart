@@ -14,7 +14,7 @@ app.use(express.json());
 // Enable CORS for local dev and Netlify deployment
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://swiftkaart.netlify.app"],
+    origin: ["https://swiftkaart.netlify.app", "http://localhost:5173"],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   })
