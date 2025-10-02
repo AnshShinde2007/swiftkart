@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { FiSearch, FiShoppingCart } from "react-icons/fi";
 import { Card, Modal, Button } from "react-bootstrap";
-
+import 'bootstrap/dist/css/bootstrap.min.css';
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
