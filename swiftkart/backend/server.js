@@ -11,10 +11,10 @@ const adminRoutes = require("./routes/adminroutes"); // ✅ add this
 const app = express();
 app.use(express.json());
 
-// Enable CORS for localhost:5173
+// Enable CORS for local dev and Netlify deployment
 app.use(
   cors({
-    origin: "https://swiftkaart.netlify.app",
+    origin: ["http://localhost:5173", "https://swiftkaart.netlify.app"],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   })
@@ -25,6 +25,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/admin", adminRoutes); // ✅ add this line
+// ImageKit auth lives under products router at /api/products/imagekit/auth
 
 // Database connection
 mongoose

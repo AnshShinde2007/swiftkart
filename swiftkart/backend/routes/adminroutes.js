@@ -3,7 +3,7 @@ const { verifyAdmin } = require("../middleware/authmiddlewar");
 const router = express.Router();
 
 // Protect admin routes
-router.get("/admin", verifyAdmin, (req, res) => {
+router.get("/", verifyAdmin, (req, res) => {
   res.json({ message: "Welcome to the admin dashboard!" });
 });
 
