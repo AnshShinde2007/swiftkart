@@ -17,12 +17,17 @@ const Login = () => {
     }
     setLoading(true);
     try {
-      const response = await axios.post("https://swiftkart-backend.onrender.com/api/users/login", {
+      const response = await axios.post("/api/users/login", {
         email,
         password,
       });
 
       localStorage.setItem("token", response.data.token); // Store JWT token
+      if (typeof response.data.role === 'string') {
+        localStorage.setItem("role", response.data.role);
+      } else if (typeof response.data.isAdmin === 'boolean') {
+        localStorage.setItem("role", response.data.isAdmin ? "admin" : "user");
+      }
       navigate("/home"); // Navigate to the home page
     } catch (error) {
       setError(error.response?.data?.error || "Something went wrong.");

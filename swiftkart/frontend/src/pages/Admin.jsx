@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
+import ImageKit from "imagekit-javascript";
 
-const API_URL = "https://swiftkart-backend.onrender.com/api/products";
+const API_URL = "/api/products";
 
 export default function Admin() {
   const [products, setProducts] = useState([]);
@@ -15,6 +16,9 @@ export default function Admin() {
     imageUrl: ""
   });
   const [editingProduct, setEditingProduct] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState("");
 
   useEffect(() => {
     axios.get(API_URL)
@@ -45,7 +49,31 @@ export default function Admin() {
   const createProduct = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(API_URL, newProduct);
+      // If imageUrl is already a URL, skip upload. If it's a File object, upload to ImageKit.
+      let imageUrl = newProduct.imageUrl;
+      if (newProduct.imageUrl instanceof File) {
+        setUploading(true);
+        // 1) Get ImageKit auth params from backend
+        const authRes = await axios.get("/api/products/imagekit/auth");
+        const { token, signature, expire, publicKey } = authRes.data;
+        // 2) Initialize ImageKit client
+        const ik = new ImageKit({ 
+          urlEndpoint: import.meta.env.VITE_IMAGEKIT_URL_ENDPOINT,
+          publicKey: publicKey
+        });
+        // 3) Upload file
+        const uploadRes = await ik.upload({
+          file: newProduct.imageUrl,
+          fileName: `${Date.now()}_${newProduct.name.replace(/\s+/g, "_")}.jpg`,
+          token,
+          signature,
+          expire,
+        });
+        imageUrl = uploadRes.url;
+        setUploading(false);
+      }
+
+      const response = await axios.post(API_URL, { ...newProduct, imageUrl });
       if (response && response.data) {
         setProducts((prevProducts) => [...prevProducts, response.data]);
         setNewProduct({ name: "", description: "", price: "", category: "", stock: "", imageUrl: "" });
@@ -85,7 +113,50 @@ export default function Admin() {
           <input type="number" placeholder="Price (₹)" value={editingProduct ? editingProduct.price : newProduct.price} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, price: e.target.value }) : setNewProduct({ ...newProduct, price: e.target.value })} className="form-control" required />
           <input type="text" placeholder="Category" value={editingProduct ? editingProduct.category : newProduct.category} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, category: e.target.value }) : setNewProduct({ ...newProduct, category: e.target.value })} className="form-control" required />
           <input type="number" placeholder="Stock" value={editingProduct ? editingProduct.stock : newProduct.stock} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, stock: e.target.value }) : setNewProduct({ ...newProduct, stock: e.target.value })} className="form-control" required />
-          <input type="text" placeholder="Image URL" value={editingProduct ? editingProduct.imageUrl : newProduct.imageUrl} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, imageUrl: e.target.value }) : setNewProduct({ ...newProduct, imageUrl: e.target.value })} className="form-control" required />
+          <div
+            onDragEnter={(e) => { e.preventDefault(); setDragActive(true); }}
+            onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+            onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragActive(false);
+              const file = e.dataTransfer.files?.[0];
+              if (!file) return;
+              const objectUrl = URL.createObjectURL(file);
+              setPreviewUrl(objectUrl);
+              if (editingProduct) {
+                setEditingProduct({ ...editingProduct, imageUrl: file });
+              } else {
+                setNewProduct({ ...newProduct, imageUrl: file });
+              }
+            }}
+            className={`border rounded p-3 text-center ${dragActive ? 'bg-light' : ''}`}
+            style={{ cursor: 'pointer' }}
+          >
+            <div className="mb-2">Drag & drop an image here, or click to choose</div>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const objectUrl = URL.createObjectURL(file);
+                setPreviewUrl(objectUrl);
+                if (editingProduct) {
+                  setEditingProduct({ ...editingProduct, imageUrl: file });
+                } else {
+                  setNewProduct({ ...newProduct, imageUrl: file });
+                }
+              }}
+              className="form-control"
+            />
+            {previewUrl && (
+              <div className="mt-2">
+                <img src={previewUrl} alt="preview" style={{ maxWidth: '100%', maxHeight: 200, objectFit: 'cover' }} />
+              </div>
+            )}
+          </div>
+          {uploading && <div className="text-muted small">Uploading image...</div>}
           <button type="submit" className="btn btn-success">{editingProduct ? "Update Product" : "Add Product"}</button>
         </form>
       </div>

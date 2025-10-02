@@ -10,9 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@imagekit/javascript": "^5.1.0",
     "@tailwindcss/vite": "^4.0.9",
     "axios": "^1.9.0",
     "bootstrap": "^5.3.3",
+    "imagekit-javascript": "^4.0.1",
     "prop-types": "^15.8.1",
     "react": "^19.0.0",
     "react-bootstrap": "^2.10.10",

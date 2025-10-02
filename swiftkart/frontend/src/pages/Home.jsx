@@ -14,7 +14,7 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const productResponse = await axios.get("https://swiftkart-backend.onrender.com/api/products");
+        const productResponse = await axios.get("/api/products");
         setProducts(productResponse.data);
         setFilteredProducts(productResponse.data);
       } catch (error) {
